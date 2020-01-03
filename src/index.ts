@@ -79,6 +79,12 @@ const processType = (checker: ts.TypeChecker) => (type: ts.Type): string => {
     if (isStringLiteralUnion) {
       return getOptimizedStringLiteralUnion(type);
     }
+    if (type.types && type.types.some(item => item.flags === 32768)) {
+      type.types = type.types.filter(item => item.flags !== 32768)
+      if (type.types.length === 1) {
+        return type.types.map(processType(checker))
+      }
+    }
     return `t.union([${type.types.map(processType(checker)).join(", ")}])`;
   } else if (type.isIntersection()) {
     return `t.intersection([${type.types
